@@ -1,0 +1,186 @@
+-- ============================================
+-- PETAL - Database SQL (Updated for DB Course Requirements)
+-- ============================================
+
+CREATE DATABASE IF NOT EXISTS petal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE petal_db;
+
+-- 1. Colors Table (Table 1)
+CREATE TABLE IF NOT EXISTS colors (
+    name VARCHAR(20) PRIMARY KEY,
+    bg_hex VARCHAR(10) NOT NULL,
+    dark_hex VARCHAR(10) NOT NULL,
+    emoji VARCHAR(10) NOT NULL
+);
+
+-- 2. Users Table (Table 2)
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Private Messages Table (Table 3)
+CREATE TABLE IF NOT EXISTS private_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_name VARCHAR(100) NOT NULL,
+    email_tujuan VARCHAR(150) NOT NULL,
+    pesan TEXT NOT NULL,
+    tanggal_kirim DATE NOT NULL,
+    color VARCHAR(20) DEFAULT 'pink',
+    status ENUM('pending', 'sent', 'cancelled') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (color) REFERENCES colors(name) ON DELETE SET NULL
+);
+
+-- 4. Public Messages Table (Table 4)
+CREATE TABLE IF NOT EXISTS public_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    untuk_siapa VARCHAR(150) NOT NULL,
+    pesan TEXT NOT NULL,
+    color VARCHAR(20) DEFAULT 'pink',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (color) REFERENCES colors(name) ON DELETE SET NULL
+);
+
+-- 5. Admin Logs Table (Table 5)
+CREATE TABLE IF NOT EXISTS admin_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    action VARCHAR(100) NOT NULL,
+    target_table VARCHAR(50),
+    target_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- ============================================
+-- SEED DATA
+-- ============================================
+
+-- Seed Colors
+INSERT INTO colors (name, bg_hex, dark_hex, emoji) VALUES
+('pink', '#f9a8c9', '#e879a8', '🌸'),
+('purple', '#c4b5fd', '#7c5cbf', '💜'),
+('white', '#ffffff', '#6b7280', '🤍'),
+('blue', '#93c5fd', '#2563eb', '🫧'),
+('yellow', '#fde68a', '#ca8a04', '☀️')
+ON DUPLICATE KEY UPDATE bg_hex=VALUES(bg_hex), dark_hex=VALUES(dark_hex), emoji=VALUES(emoji);
+
+-- Seed Admin User (password: admin123)
+INSERT INTO users (id, username, password) VALUES 
+(1, 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')
+ON DUPLICATE KEY UPDATE username=VALUES(username);
+
+-- Seed Private Messages
+INSERT INTO private_messages (sender_name, email_tujuan, pesan, tanggal_kirim, color) VALUES
+('Rina', 'rina@example.com', 'Halo diriku di masa depan! Semoga kamu sudah lebih berani dari sekarang.', '2026-12-31', 'pink'),
+('Budi', 'budi@example.com', 'Dear future me, jangan lupa mimpi kita waktu kuliah ya.', '2027-06-01', 'purple'),
+('Sari', 'sari@example.com', 'Kalau kamu baca ini, artinya kamu sudah melewati semua itu. Proud of you.', '2026-09-15', 'pink'),
+('Dito', 'dito@example.com', 'Semoga bisnis kecil kita sudah berkembang ya.', '2027-01-01', 'white'),
+('Maya', 'maya@example.com', 'Tetap jadi dirimu sendiri, no matter what.', '2026-11-20', 'blue');
+
+-- Seed Public Messages
+INSERT INTO public_messages (untuk_siapa, pesan, color) VALUES
+('Dunia', 'Semoga kalian baik-baik saja di luar sana. Kita semua sedang berjuang.', 'pink'),
+('Siapapun yang lagi sedih', 'Ini pun akan berlalu. Percayalah.', 'purple'),
+('Generasi berikutnya', 'Kami mencintai bumi ini, tolong jaga ia baik-baik.', 'white'),
+('Diriku sendiri', 'Kamu lebih kuat dari yang kamu kira.', 'yellow'),
+('Semua orang', 'Jangan lupa untuk beristirahat. Kamu tidak harus selalu produktif.', 'blue');
+
+-- ============================================
+-- VIEWS (Min 2 Views)
+-- ============================================
+
+-- View 1: Public Messages Summary with Color info
+CREATE OR REPLACE VIEW v_public_messages_summary AS
+SELECT 
+    pm.id, 
+    pm.untuk_siapa, 
+    pm.pesan, 
+    pm.created_at, 
+    pm.color,
+    c.bg_hex, 
+    c.dark_hex, 
+    c.emoji
+FROM public_messages pm
+LEFT JOIN colors c ON pm.color = c.name;
+
+-- View 2: Admin Activity logs with username
+CREATE OR REPLACE VIEW v_admin_activity_log AS
+SELECT 
+    al.id, 
+    al.action, 
+    al.target_table, 
+    al.target_id, 
+    al.created_at, 
+    u.username
+FROM admin_logs al
+LEFT JOIN users u ON al.user_id = u.id;
+
+-- ============================================
+-- FUNCTIONS (Min 2 Functions)
+-- ============================================
+
+-- Function 1: Get Total messages in database (public + private)
+DROP FUNCTION IF EXISTS get_total_messages;
+DELIMITER //
+CREATE FUNCTION get_total_messages()
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE total INT;
+    SELECT 
+        (SELECT COUNT(*) FROM private_messages) + 
+        (SELECT COUNT(*) FROM public_messages) 
+    INTO total;
+    RETURN total;
+END //
+DELIMITER ;
+
+-- Function 2: Get Emoji for a specific color
+DROP FUNCTION IF EXISTS get_color_emoji;
+DELIMITER //
+CREATE FUNCTION get_color_emoji(color_name VARCHAR(20))
+RETURNS VARCHAR(10)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE emoji_val VARCHAR(10);
+    SELECT emoji INTO emoji_val FROM colors WHERE name = color_name LIMIT 1;
+    IF emoji_val IS NULL THEN
+        SET emoji_val = '🌸';
+    END IF;
+    RETURN emoji_val;
+END //
+DELIMITER ;
+
+-- ============================================
+-- TRIGGERS (Min 2 Triggers)
+-- ============================================
+
+-- Trigger 1: Log public message deletion
+DROP TRIGGER IF EXISTS before_public_message_delete;
+DELIMITER //
+CREATE TRIGGER before_public_message_delete
+BEFORE DELETE ON public_messages
+FOR EACH ROW
+BEGIN
+    INSERT INTO admin_logs (user_id, action, target_table, target_id)
+    VALUES (1, 'DELETE_PUBLIC_MESSAGE', 'public_messages', OLD.id);
+END //
+DELIMITER ;
+
+-- Trigger 2: Log private message deletion
+DROP TRIGGER IF EXISTS before_private_message_delete;
+DELIMITER //
+CREATE TRIGGER before_private_message_delete
+BEFORE DELETE ON private_messages
+FOR EACH ROW
+BEGIN
+    INSERT INTO admin_logs (user_id, action, target_table, target_id)
+    VALUES (1, 'DELETE_PRIVATE_MESSAGE', 'private_messages', OLD.id);
+END //
+DELIMITER ;
