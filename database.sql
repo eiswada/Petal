@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS private_messages (
     pesan TEXT NOT NULL,
     tanggal_kirim DATE NOT NULL,
     color VARCHAR(20) DEFAULT 'pink',
+    font VARCHAR(20) DEFAULT 'sans',
     status ENUM('pending', 'sent', 'cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (color) REFERENCES colors(name) ON DELETE SET NULL
@@ -40,6 +41,7 @@ CREATE TABLE IF NOT EXISTS public_messages (
     untuk_siapa VARCHAR(150) NOT NULL,
     pesan TEXT NOT NULL,
     color VARCHAR(20) DEFAULT 'pink',
+    font VARCHAR(20) DEFAULT 'sans',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (color) REFERENCES colors(name) ON DELETE SET NULL
 );
@@ -74,20 +76,20 @@ INSERT INTO users (id, username, email, password) VALUES
 ON DUPLICATE KEY UPDATE username=VALUES(username), email=VALUES(email);
 
 -- Seed Private Messages
-INSERT INTO private_messages (sender_name, email_tujuan, pesan, tanggal_kirim, color) VALUES
-('Rina', 'rina@example.com', 'Halo diriku di masa depan! Semoga kamu sudah lebih berani dari sekarang.', '2026-12-31', 'pink'),
-('Budi', 'budi@example.com', 'Dear future me, jangan lupa mimpi kita waktu kuliah ya.', '2027-06-01', 'purple'),
-('Sari', 'sari@example.com', 'Kalau kamu baca ini, artinya kamu sudah melewati semua itu. Proud of you.', '2026-09-15', 'pink'),
-('Dito', 'dito@example.com', 'Semoga bisnis kecil kita sudah berkembang ya.', '2027-01-01', 'white'),
-('Maya', 'maya@example.com', 'Tetap jadi dirimu sendiri, no matter what.', '2026-11-20', 'blue');
+INSERT INTO private_messages (sender_name, email_tujuan, pesan, tanggal_kirim, color, font) VALUES
+('Rina', 'rina@example.com', 'Halo diriku di masa depan! Semoga kamu sudah lebih berani dari sekarang.', '2026-12-31', 'pink', 'sans'),
+('Budi', 'budi@example.com', 'Dear future me, jangan lupa mimpi kita waktu kuliah ya.', '2027-06-01', 'purple', 'serif'),
+('Sari', 'sari@example.com', 'Kalau kamu baca ini, artinya kamu sudah melewati semua itu. Proud of you.', '2026-09-15', 'pink', 'sans'),
+('Dito', 'dito@example.com', 'Semoga bisnis kecil kita sudah berkembang ya.', '2027-01-01', 'white', 'mono'),
+('Maya', 'maya@example.com', 'Tetap jadi dirimu sendiri, no matter what.', '2026-11-20', 'blue', 'sans');
 
 -- Seed Public Messages
-INSERT INTO public_messages (untuk_siapa, pesan, color) VALUES
-('Dunia', 'Semoga kalian baik-baik saja di luar sana. Kita semua sedang berjuang.', 'pink'),
-('Siapapun yang lagi sedih', 'Ini pun akan berlalu. Percayalah.', 'purple'),
-('Generasi berikutnya', 'Kami mencintai bumi ini, tolong jaga ia baik-baik.', 'white'),
-('Diriku sendiri', 'Kamu lebih kuat dari yang kamu kira.', 'yellow'),
-('Semua orang', 'Jangan lupa untuk beristirahat. Kamu tidak harus selalu produktif.', 'blue');
+INSERT INTO public_messages (untuk_siapa, pesan, color, font) VALUES
+('Dunia', 'Semoga kalian baik-baik saja di luar sana. Kita semua sedang berjuang.', 'pink', 'sans'),
+('Siapapun yang lagi sedih', 'Ini pun akan berlalu. Percayalah.', 'purple', 'serif'),
+('Generasi berikutnya', 'Kami mencintai bumi ini, tolong jaga ia baik-baik.', 'white', 'mono'),
+('Diriku sendiri', 'Kamu lebih kuat dari yang kamu kira.', 'yellow', 'sans'),
+('Semua orang', 'Jangan lupa untuk beristirahat. Kamu tidak harus selalu produktif.', 'blue', 'sans');
 
 -- ============================================
 -- VIEWS 
@@ -101,6 +103,7 @@ SELECT
     pm.pesan, 
     pm.created_at, 
     pm.color,
+    pm.font,
     c.bg_hex, 
     c.dark_hex
 FROM public_messages pm
