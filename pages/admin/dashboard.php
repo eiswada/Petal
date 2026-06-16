@@ -30,7 +30,7 @@ if ($tab === 'private') {
         $where = "WHERE sender_name LIKE '%$s%' OR email_tujuan LIKE '%$s%'";
     }
     $total_rows = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM private_messages $where"))[0];
-    $result = mysqli_query($conn, "SELECT * FROM private_messages $where ORDER BY created_at DESC LIMIT $per_page OFFSET $offset");
+    $result = mysqli_query($conn, "SELECT *, is_delivery_due(tanggal_kirim, status) AS is_due FROM private_messages $where ORDER BY created_at DESC LIMIT $per_page OFFSET $offset");
     $messages = mysqli_fetch_all($result, MYSQLI_ASSOC);
 } else {
     $where = '';
@@ -66,10 +66,13 @@ $total_pages = ceil($total_rows / $per_page);
         </div>
         <nav class="nav flex-column gap-1">
             <a href="?tab=private" class="nav-link <?= $tab=='private' ? 'active' : '' ?>">
-                <i class="bi bi-envelope-lock me-2"></i> Private Letters
+                <i class="bi bi-envelope me-2"></i> Private Letters
             </a>
             <a href="?tab=public" class="nav-link <?= $tab=='public' ? 'active' : '' ?>">
                 <i class="bi bi-globe me-2"></i> Public Messages
+            </a>
+            <a href="settings.php" class="nav-link">
+                <i class="bi bi-gear me-2"></i> Settings
             </a>
             <hr style="border-color:rgba(255,255,255,.1);">
             <a href="logout.php" class="nav-link text-danger">
@@ -85,15 +88,16 @@ $total_pages = ceil($total_rows / $per_page);
             <span class="text-white fw-bold d-flex align-items-center gap-2">
                 <img src="../../assets/img/logo.png" alt="Petal" style="width: 24px; height: auto;"> Petal Admin
             </span>
-            <div class="d-flex gap-2">
-                <a href="?tab=private" class="btn btn-sm btn-outline-light">Private</a>
-                <a href="?tab=public" class="btn btn-sm btn-outline-light">Public</a>
-                <a href="logout.php" class="btn btn-sm btn-danger">Logout</a>
+            <div class="d-flex gap-1">
+                <a href="dashboard.php?tab=private" class="btn btn-sm" style="background: <?= $tab=='private' ? 'rgba(255,255,255,0.9)' : 'transparent' ?>; color: <?= $tab=='private' ? 'var(--dark)' : '#ffffff' ?>; border: 1px solid rgba(255,255,255,0.4);" title="Private Letters"><i class="bi bi-envelope"></i></a>
+                <a href="dashboard.php?tab=public" class="btn btn-sm" style="background: <?= $tab=='public' ? 'rgba(255,255,255,0.9)' : 'transparent' ?>; color: <?= $tab=='public' ? 'var(--dark)' : '#ffffff' ?>; border: 1px solid rgba(255,255,255,0.4);" title="Public Messages"><i class="bi bi-globe"></i></a>
+                <a href="settings.php" class="btn btn-sm" style="background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.4);" title="Settings"><i class="bi bi-gear"></i></a>
+                <a href="logout.php" class="btn btn-sm btn-danger" style="border: 1px solid transparent;" title="Logout"><i class="bi bi-box-arrow-left"></i></a>
             </div>
         </div>
 
         <h4 class="fw-bold mb-1">Dashboard</h4>
-        <p class="text-muted small mb-4">Welcome back, <?= htmlspecialchars($_SESSION['admin_username']) ?> 👋</p>
+        <p class="text-muted small mb-4">Welcome back, <?= htmlspecialchars($_SESSION['admin_username']) ?> !</p>
 
         <!-- Stats -->
         <div class="row g-3 mb-4">
@@ -159,9 +163,14 @@ $total_pages = ceil($total_rows / $per_page);
                     <tr><td colspan="6" class="text-center text-muted py-4">No messages found.</td></tr>
                     <?php endif; ?>
                     <?php foreach ($messages as $msg): ?>
-                    <tr>
+                    <tr class="<?= isset($msg['is_due']) && $msg['is_due'] == 1 ? 'table-danger' : '' ?>">
                         <td class="text-muted"><?= $msg['id'] ?></td>
-                        <td><?= htmlspecialchars($msg['sender_name']) ?></td>
+                        <td>
+                            <?= htmlspecialchars($msg['sender_name']) ?>
+                            <?php if (isset($msg['is_due']) && $msg['is_due'] == 1): ?>
+                                <span class="badge bg-danger ms-1 animate-pulse" style="font-size:0.65rem;">DUE</span>
+                            <?php endif; ?>
+                        </td>
                         <td><?= htmlspecialchars($msg['email_tujuan']) ?></td>
                         <td><?= date('d M Y', strtotime($msg['tanggal_kirim'])) ?></td>
                         <td>

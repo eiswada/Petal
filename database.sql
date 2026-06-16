@@ -1,27 +1,27 @@
 -- ============================================
--- PETAL - Database SQL (Updated for DB Course Requirements)
+-- PETAL - Database SQL 
 -- ============================================
 
 CREATE DATABASE IF NOT EXISTS petal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE petal_db;
 
--- 1. Colors Table (Table 1)
+-- 1. Colors Table (Table 1 - Warna)
 CREATE TABLE IF NOT EXISTS colors (
     name VARCHAR(20) PRIMARY KEY,
     bg_hex VARCHAR(10) NOT NULL,
-    dark_hex VARCHAR(10) NOT NULL,
-    emoji VARCHAR(10) NOT NULL
+    dark_hex VARCHAR(10) NOT NULL
 );
 
--- 2. Users Table (Table 2)
+-- 2. Users Table (Table 2 - Admin)
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Private Messages Table (Table 3)
+-- 3. Private Messages Table (Table 3 - Kapsul Waktu Privat)
 CREATE TABLE IF NOT EXISTS private_messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sender_name VARCHAR(100) NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS private_messages (
     FOREIGN KEY (color) REFERENCES colors(name) ON DELETE SET NULL
 );
 
--- 4. Public Messages Table (Table 4)
+-- 4. Public Messages Table (Table 4 - Kapsul Waktu Publik)
 CREATE TABLE IF NOT EXISTS public_messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     untuk_siapa VARCHAR(150) NOT NULL,
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS public_messages (
     FOREIGN KEY (color) REFERENCES colors(name) ON DELETE SET NULL
 );
 
--- 5. Admin Logs Table (Table 5)
+-- 5. Admin Logs Table (Table 5 - Log Aktivitas)
 CREATE TABLE IF NOT EXISTS admin_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -60,18 +60,18 @@ CREATE TABLE IF NOT EXISTS admin_logs (
 -- ============================================
 
 -- Seed Colors
-INSERT INTO colors (name, bg_hex, dark_hex, emoji) VALUES
-('pink', '#f9a8c9', '#e879a8', '🌸'),
-('purple', '#c4b5fd', '#7c5cbf', '💜'),
-('white', '#ffffff', '#6b7280', '🤍'),
-('blue', '#93c5fd', '#2563eb', '🫧'),
-('yellow', '#fde68a', '#ca8a04', '☀️')
-ON DUPLICATE KEY UPDATE bg_hex=VALUES(bg_hex), dark_hex=VALUES(dark_hex), emoji=VALUES(emoji);
+INSERT INTO colors (name, bg_hex, dark_hex) VALUES
+('pink', '#f9a8c9', '#e879a8'),
+('purple', '#c4b5fd', '#7c5cbf'),
+('white', '#ffffff', '#6b7280'),
+('blue', '#93c5fd', '#2563eb'),
+('yellow', '#fde68a', '#ca8a04')
+ON DUPLICATE KEY UPDATE bg_hex=VALUES(bg_hex), dark_hex=VALUES(dark_hex);
 
 -- Seed Admin User (password: admin123)
-INSERT INTO users (id, username, password) VALUES 
-(1, 'admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')
-ON DUPLICATE KEY UPDATE username=VALUES(username);
+INSERT INTO users (id, username, email, password) VALUES 
+(1, 'admin', 'admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')
+ON DUPLICATE KEY UPDATE username=VALUES(username), email=VALUES(email);
 
 -- Seed Private Messages
 INSERT INTO private_messages (sender_name, email_tujuan, pesan, tanggal_kirim, color) VALUES
@@ -90,7 +90,7 @@ INSERT INTO public_messages (untuk_siapa, pesan, color) VALUES
 ('Semua orang', 'Jangan lupa untuk beristirahat. Kamu tidak harus selalu produktif.', 'blue');
 
 -- ============================================
--- VIEWS (Min 2 Views)
+-- VIEWS 
 -- ============================================
 
 -- View 1: Public Messages Summary with Color info
@@ -102,8 +102,7 @@ SELECT
     pm.created_at, 
     pm.color,
     c.bg_hex, 
-    c.dark_hex, 
-    c.emoji
+    c.dark_hex
 FROM public_messages pm
 LEFT JOIN colors c ON pm.color = c.name;
 
@@ -120,7 +119,7 @@ FROM admin_logs al
 LEFT JOIN users u ON al.user_id = u.id;
 
 -- ============================================
--- FUNCTIONS (Min 2 Functions)
+-- FUNCTIONS
 -- ============================================
 
 -- Function 1: Get Total messages in database (public + private)
@@ -140,25 +139,24 @@ BEGIN
 END //
 DELIMITER ;
 
--- Function 2: Get Emoji for a specific color
-DROP FUNCTION IF EXISTS get_color_emoji;
+-- Function 2: Check if message is due for delivery
+DROP FUNCTION IF EXISTS is_delivery_due;
 DELIMITER //
-CREATE FUNCTION get_color_emoji(color_name VARCHAR(20))
-RETURNS VARCHAR(10)
+CREATE FUNCTION is_delivery_due(tanggal_kirim DATE, status_pesan VARCHAR(20))
+RETURNS INT
 DETERMINISTIC
-READS SQL DATA
+NO SQL
 BEGIN
-    DECLARE emoji_val VARCHAR(10);
-    SELECT emoji INTO emoji_val FROM colors WHERE name = color_name LIMIT 1;
-    IF emoji_val IS NULL THEN
-        SET emoji_val = '🌸';
+    IF tanggal_kirim <= CURDATE() AND status_pesan = 'pending' THEN
+        RETURN 1;
+    ELSE
+        RETURN 0;
     END IF;
-    RETURN emoji_val;
 END //
 DELIMITER ;
 
 -- ============================================
--- TRIGGERS (Min 2 Triggers)
+-- TRIGGERS 
 -- ============================================
 
 -- Trigger 1: Log public message deletion

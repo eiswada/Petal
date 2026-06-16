@@ -1,3 +1,30 @@
-"vendor/" 
-"node_modules/" 
-".env" 
+# OS Metadata Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor Configurations
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.project
+.settings/
+
+# Packages & Dependency Directories
+vendor/
+node_modules/
+
+# Environment Configurations & API Keys
+.env
+.env.local
+.env.*.local
+
+# Logs and databases
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -24,34 +24,24 @@ require_once 'includes/header.php';
   <div class="hs-cards-wrap">
     <div class="hs-cards">
 
-      <a href="pages/write.php?color=pink" class="memo-card" data-color="pink" style="--mc:#f9a8c9;--mc-dark:#e879a8; transform: rotate(-5deg) translate(-10px, 8px);">
-        <div class="mc-header">sakura</div>
-        <div class="mc-lines"><span></span><span></span><span></span></div>
-        <div class="mc-cta">write →</div>
+      <a href="pages/write.php?color=pink" class="memo-card" data-color="pink" style="transform: rotate(-5deg) translate(-10px, 8px);">
+        <div class="mc-icon-wrap"><i class="bi bi-flower1"></i></div>
       </a>
 
-      <a href="pages/write.php?color=purple" class="memo-card" data-color="purple" style="--mc:#c4b5fd;--mc-dark:#7c5cbf; transform: rotate(3deg) translate(8px, -12px);">
-        <div class="mc-header">purple</div>
-        <div class="mc-lines"><span></span><span></span><span></span></div>
-        <div class="mc-cta">write →</div>
+      <a href="pages/write.php?color=purple" class="memo-card" data-color="purple" style="transform: rotate(3deg) translate(8px, -12px);">
+        <div class="mc-icon-wrap"><i class="bi bi-moon-stars"></i></div>
       </a>
 
-      <a href="pages/write.php?color=white" class="memo-card" data-color="white" style="--mc:#ffffff;--mc-dark:#6b7280; transform: rotate(6deg) translate(-4px, -8px);">
-        <div class="mc-header">white</div>
-        <div class="mc-lines"><span></span><span></span><span></span></div>
-        <div class="mc-cta">write →</div>
+      <a href="pages/write.php?color=white" class="memo-card" data-color="white" style="transform: rotate(6deg) translate(-4px, -8px);">
+        <div class="mc-icon-wrap"><i class="bi bi-circle"></i></div>
       </a>
 
-      <a href="pages/write.php?color=blue" class="memo-card" data-color="blue" style="--mc:#93c5fd;--mc-dark:#2563eb; transform: rotate(-4deg) translate(10px, 6px);">
-        <div class="mc-header">blue</div>
-        <div class="mc-lines"><span></span><span></span><span></span></div>
-        <div class="mc-cta">write →</div>
+      <a href="pages/write.php?color=blue" class="memo-card" data-color="blue" style="transform: rotate(-4deg) translate(10px, 6px);">
+        <div class="mc-icon-wrap"><i class="bi bi-droplet"></i></div>
       </a>
 
-      <a href="pages/write.php?color=yellow" class="memo-card" data-color="yellow" style="--mc:#fde68a;--mc-dark:#ca8a04; transform: rotate(4deg) translate(-8px, 12px);">
-        <div class="mc-header">yellow</div>
-        <div class="mc-lines"><span></span><span></span><span></span></div>
-        <div class="mc-cta">write →</div>
+      <a href="pages/write.php?color=yellow" class="memo-card" data-color="yellow" style="transform: rotate(4deg) translate(-8px, 12px);">
+        <div class="mc-icon-wrap"><i class="bi bi-sun"></i></div>
       </a>
 
     </div>

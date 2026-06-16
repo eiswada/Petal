@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Admin Login — Petal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <link href="../../assets/css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -60,6 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <?php endif; ?>
 
+            <?php if (isset($_GET['deleted_account'])): ?>
+            <div class="petal-alert-success mb-3 auto-dismiss">
+                Account deleted successfully.
+            </div>
+            <?php endif; ?>
+
             <form method="POST" id="login-form">
                 <div class="mb-3">
                     <label for="username" class="form-label">Username</label>
@@ -70,8 +77,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="mb-4">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" 
-                           placeholder="••••••••" autocomplete="current-password">
+                    <div class="input-group" style="position:relative;">
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="••••••••" autocomplete="current-password" style="padding-right: 45px; border-radius:12px !important;">
+                        <button class="btn" type="button" id="toggle-password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); border:none; background:transparent; padding:0; z-index:10; color:var(--gray); transition:color 0.2s;">
+                            <i class="bi bi-eye" style="font-size:1.1rem;"></i>
+                        </button>
+                    </div>
                     <small class="field-error text-danger" id="error-password" style="display:none;"></small>
                 </div>
                 <button type="submit" class="petal-btn-primary w-100" style="padding:.85rem;">
@@ -109,6 +121,24 @@ document.addEventListener('DOMContentLoaded', function() {
             valid = false;
         }
         if (!valid) e.preventDefault();
+    });
+
+    // Toggle Password Visibility
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password');
+    togglePasswordBtn.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        const icon = this.querySelector('i');
+        icon.classList.toggle('bi-eye');
+        icon.classList.toggle('bi-eye-slash');
+        
+        if (type === 'text') {
+            this.style.color = 'var(--dark)';
+        } else {
+            this.style.color = 'var(--gray)';
+        }
     });
 });
 </script>
