@@ -23,10 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $color = isset($_POST['color']) && in_array($_POST['color'], $colors) ? $_POST['color'] : 'pink';
 
   if ($type === 'private') {
-    $sender_name   = htmlspecialchars(trim($_POST['sender_name'] ?? ''));
-    $email_tujuan  = htmlspecialchars(trim($_POST['email_tujuan'] ?? ''));
-    $pesan         = htmlspecialchars(trim($_POST['pesan'] ?? ''));
-    $tanggal_kirim = htmlspecialchars(trim($_POST['tanggal_kirim'] ?? ''));
+    $sender_name   = trim($_POST['sender_name'] ?? '');
+    $email_tujuan  = trim($_POST['email_tujuan'] ?? '');
+    $pesan         = trim($_POST['pesan'] ?? '');
+    $tanggal_kirim = trim($_POST['tanggal_kirim'] ?? '');
+    $font          = isset($_POST['font']) && in_array($_POST['font'], ['sans','serif','mono']) ? $_POST['font'] : 'sans';
 
     if (empty($sender_name) || empty($email_tujuan) || empty($pesan) || empty($tanggal_kirim)) {
       $error = 'Semua field harus diisi.';
@@ -35,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (strtotime($tanggal_kirim) <= time()) {
       $error = 'Tanggal kirim harus di masa depan.';
     } else {
-      $stmt = mysqli_prepare($conn, "INSERT INTO private_messages (sender_name, email_tujuan, pesan, tanggal_kirim, color) VALUES (?, ?, ?, ?, ?)");
-      mysqli_stmt_bind_param($stmt, 'sssss', $sender_name, $email_tujuan, $pesan, $tanggal_kirim, $color);
+      $stmt = mysqli_prepare($conn, "INSERT INTO private_messages (sender_name, email_tujuan, pesan, tanggal_kirim, color, font) VALUES (?, ?, ?, ?, ?, ?)");
+      mysqli_stmt_bind_param($stmt, 'ssssss', $sender_name, $email_tujuan, $pesan, $tanggal_kirim, $color, $font);
       if (mysqli_stmt_execute($stmt)) {
             $success = 'private';
             sendFutureLetter($email_tujuan, $sender_name, $pesan, $tanggal_kirim, $color);
@@ -46,14 +47,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
   } else {
-    $untuk_siapa = htmlspecialchars(trim($_POST['untuk_siapa'] ?? ''));
-    $pesan       = htmlspecialchars(trim($_POST['pesan_public'] ?? ''));
+    $untuk_siapa = trim($_POST['untuk_siapa'] ?? '');
+    $pesan       = trim($_POST['pesan_public'] ?? '');
+    $font        = isset($_POST['font']) && in_array($_POST['font'], ['sans','serif','mono']) ? $_POST['font'] : 'sans';
 
     if (empty($untuk_siapa) || empty($pesan)) {
       $error = 'Semua field harus diisi.';
     } else {
-      $stmt = mysqli_prepare($conn, "INSERT INTO public_messages (untuk_siapa, pesan, color) VALUES (?, ?, ?)");
-      mysqli_stmt_bind_param($stmt, 'sss', $untuk_siapa, $pesan, $color);
+      $stmt = mysqli_prepare($conn, "INSERT INTO public_messages (untuk_siapa, pesan, color, font) VALUES (?, ?, ?, ?)");
+      mysqli_stmt_bind_param($stmt, 'ssss', $untuk_siapa, $pesan, $color, $font);
       if (mysqli_stmt_execute($stmt)) { $success = 'public'; }
       else { $error = 'Gagal menyimpan pesan. Coba lagi.'; }
     }
@@ -371,6 +373,7 @@ elseif ($selected_color === 'yellow') { $sheet_bg = '#fff9db'; $sheet_border = '
     <form id="write-form" method="POST" style="width: 100%; display: flex; justify-content: center;">
       <input type="hidden" name="message_type" id="message_type" value="<?= $selected_type ?>">
       <input type="hidden" name="color" id="color-input" value="<?= $selected_color ?>">
+      <input type="hidden" name="font" id="font-input" value="sans">
 
       <div class="editor-window">
         
@@ -538,6 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const fontBtns = document.querySelectorAll('.settings-font-btn');
   const textareas = document.querySelectorAll('.editor-textarea');
   const inputs = document.querySelectorAll('.editor-input');
+  const fontInput = document.getElementById('font-input');
 
   fontBtns.forEach(btn => {
     btn.addEventListener('click', function() {
@@ -545,6 +549,8 @@ document.addEventListener('DOMContentLoaded', function() {
       this.classList.add('active');
       
       const font = this.dataset.font;
+      fontInput.value = font; // Save selected font type to form field
+      
       let fontFamily = '';
       if (font === 'sans') {
         fontFamily = "'Plus Jakarta Sans', sans-serif";
