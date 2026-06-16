@@ -41,7 +41,7 @@ Aplikasi ini dibangun khusus untuk memenuhi persyaratan tugas proyek akhir **Pra
 petal/
 ├── assets/
 │   ├── css/
-│   │   └── style.css      # Custom stylesheet & media queries
+│   │   └── style.css     # Custom stylesheet & media queries
 │   └── js/
 │       └── main.js       # JS client validations & DOM scripts
 ├── includes/
