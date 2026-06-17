@@ -30,11 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $font          = isset($_POST['font']) && in_array($_POST['font'], ['sans','serif','mono']) ? $_POST['font'] : 'sans';
 
     if (empty($sender_name) || empty($email_tujuan) || empty($pesan) || empty($tanggal_kirim)) {
-      $error = 'Semua field harus diisi.';
+      $error = 'All fields are required.';
     } elseif (!filter_var($email_tujuan, FILTER_VALIDATE_EMAIL)) {
-      $error = 'Format email tidak valid.';
+      $error = 'Invalid email format.';
     } elseif (strtotime($tanggal_kirim) <= time()) {
-      $error = 'Tanggal kirim harus di masa depan.';
+      $error = 'Delivery date must be in the future.';
     } else {
       $stmt = mysqli_prepare($conn, "INSERT INTO private_messages (sender_name, email_tujuan, pesan, tanggal_kirim, color, font) VALUES (?, ?, ?, ?, ?, ?)");
       mysqli_stmt_bind_param($stmt, 'ssssss', $sender_name, $email_tujuan, $pesan, $tanggal_kirim, $color, $font);
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success = 'private';
             sendFutureLetter($email_tujuan, $sender_name, $pesan, $tanggal_kirim, $color);
         } else {
-            $error = 'Gagal menyimpan pesan. Coba lagi.';
+            $error = 'Failed to save message. Please try again.';
         }
     }
 
@@ -52,12 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $font        = isset($_POST['font']) && in_array($_POST['font'], ['sans','serif','mono']) ? $_POST['font'] : 'sans';
 
     if (empty($untuk_siapa) || empty($pesan)) {
-      $error = 'Semua field harus diisi.';
+      $error = 'All fields are required.';
     } else {
       $stmt = mysqli_prepare($conn, "INSERT INTO public_messages (untuk_siapa, pesan, color, font) VALUES (?, ?, ?, ?)");
       mysqli_stmt_bind_param($stmt, 'ssss', $untuk_siapa, $pesan, $color, $font);
       if (mysqli_stmt_execute($stmt)) { $success = 'public'; }
-      else { $error = 'Gagal menyimpan pesan. Coba lagi.'; }
+      else { $error = 'Failed to save message. Please try again.'; }
     }
   }
 
@@ -186,6 +186,8 @@ elseif ($selected_color === 'yellow') { $sheet_bg = '#fff9db'; $sheet_border = '
     margin-top: 1.5rem;
     min-height: 280px;
     font-family: inherit;
+    width: 100%;       
+    box-sizing: border-box;
   }
 
   /* Right Panel - Settings Sidebar */

@@ -60,7 +60,7 @@ require_once 'includes/header.php';
         <span class="hs-stat-label">World Messages</span>
       </div>
     </div>
-    <a href="pages/public-wall.php" class="hs-wall-link">See the Wall →</a>
+    <a href="pages/public-wall.php" class="petal-btn-outline" style="font-size: 0.85rem;">See the Wall →</a>
   </div>
 
 </section>
@@ -114,7 +114,7 @@ require_once 'includes/header.php';
       <?php foreach ($public_preview as $msg): ?>
       <div class="col-sm-6 col-lg-4">
         <div class="petal-card petal-card--colored" data-color="<?= htmlspecialchars($msg['color'] ?? 'white') ?>">
-          <div class="card-untuk">Untuk <?= htmlspecialchars($msg['untuk_siapa']) ?></div>
+          <div class="card-untuk">For <?= htmlspecialchars($msg['untuk_siapa']) ?></div>
           <div class="card-pesan" style="font-family: <?= $msg['font'] === 'serif' ? '\'Playfair Display\', serif' : ($msg['font'] === 'mono' ? '\'Courier New\', Courier, monospace' : 'inherit') ?>;">"<?= htmlspecialchars($msg['pesan']) ?>"</div>
           <div class="card-meta"><i class="bi bi-clock"></i> <?= date('d M Y', strtotime($msg['created_at'])) ?></div>
         </div>

@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Validate: sender_name
                 const senderName = document.getElementById('sender_name');
                 if (!senderName || senderName.value.trim().length < 2) {
-                    showError('error-sender', 'Nama minimal 2 karakter.');
+                    showError('error-sender', 'Name must be at least 2 characters.');
                     if (senderName) senderName.classList.add('is-invalid');
                     isValid = false;
                 }
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const email = document.getElementById('email_tujuan');
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!email || !emailRegex.test(email.value.trim())) {
-                    showError('error-email', 'Masukkan email yang valid.');
+                    showError('error-email', 'Please enter a valid email address.');
                     if (email) email.classList.add('is-invalid');
                     isValid = false;
                 }
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const today = new Date();
                 today.setHours(0,0,0,0);
                 if (!tanggal || new Date(tanggal.value) <= today) {
-                    showError('error-tanggal', 'Tanggal harus di masa depan.');
+                    showError('error-tanggal', 'Delivery date must be in the future.');
                     if (tanggal) tanggal.classList.add('is-invalid');
                     isValid = false;
                 }
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Validate: pesan
                 const pesan = document.getElementById('pesan_private');
                 if (!pesan || pesan.value.trim().length < 10) {
-                    showError('error-pesan-private', 'Pesan minimal 10 karakter.');
+                    showError('error-pesan-private', 'Message must be at least 10 characters.');
                     if (pesan) pesan.classList.add('is-invalid');
                     isValid = false;
                 }
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Validate: untuk_siapa
                 const untuk = document.getElementById('untuk_siapa');
                 if (!untuk || untuk.value.trim().length < 2) {
-                    showError('error-untuk', 'Isi "Untuk siapa" minimal 2 karakter.');
+                    showError('error-untuk', '"For" field must be at least 2 characters.');
                     if (untuk) untuk.classList.add('is-invalid');
                     isValid = false;
                 }
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Validate: pesan public
                 const pesanPub = document.getElementById('pesan_public');
                 if (!pesanPub || pesanPub.value.trim().length < 10) {
-                    showError('error-pesan-public', 'Pesan minimal 10 karakter.');
+                    showError('error-pesan-public', 'Message must be at least 10 characters.');
                     if (pesanPub) pesanPub.classList.add('is-invalid');
                     isValid = false;
                 }
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
-            const confirmed = confirm('Yakin ingin menghapus pesan ini? Tindakan ini tidak dapat dibatalkan.');
+            const confirmed = confirm('Are you sure you want to delete this message? This action cannot be undone.');
             if (confirmed) {
                 window.location.href = this.href;
             }

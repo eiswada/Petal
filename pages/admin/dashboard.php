@@ -7,6 +7,12 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
+// Get current admin details
+$stmt = mysqli_prepare($conn, "SELECT id, username, email, avatar FROM users WHERE username = ?");
+mysqli_stmt_bind_param($stmt, 's', $_SESSION['admin_username']);
+mysqli_stmt_execute($stmt);
+$admin = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
 // Stats
 $total_private = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM private_messages"))[0];
 $total_public  = mysqli_fetch_row(mysqli_query($conn, "SELECT COUNT(*) FROM public_messages"))[0];
@@ -46,7 +52,7 @@ if ($tab === 'private') {
 $total_pages = ceil($total_rows / $per_page);
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,6 +70,22 @@ $total_pages = ceil($total_rows / $per_page);
         <div class="petal-brand mb-4 d-flex align-items-center gap-2">
             <img src="../../assets/img/logo.png" alt="Petal" style="width: 28px; height: auto;"> Petal
         </div>
+
+        <!-- Active Admin Profile Widget -->
+        <div class="d-flex align-items-center gap-2 mb-4 p-2" style="background: rgba(255,255,255,0.06); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+            <?php if (!empty($admin['avatar']) && file_exists('../../assets/uploads/avatars/' . $admin['avatar'])): ?>
+                <img src="../../assets/uploads/avatars/<?= htmlspecialchars($admin['avatar']) ?>" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid rgba(255,255,255,0.2);">
+            <?php else: ?>
+                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width: 40px; height: 40px; font-size: 1rem; background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%); border: 2px solid rgba(255,255,255,0.2);">
+                    <?= strtoupper(substr($admin['username'], 0, 1)) ?>
+                </div>
+            <?php endif; ?>
+            <div class="text-truncate">
+                <div class="fw-bold text-white small text-truncate"><?= htmlspecialchars($admin['username']) ?></div>
+                <div class="text-white-50" style="font-size: 0.7rem;">Administrator</div>
+            </div>
+        </div>
+
         <nav class="nav flex-column gap-1">
             <a href="?tab=private" class="nav-link <?= $tab=='private' ? 'active' : '' ?>">
                 <i class="bi bi-envelope me-2"></i> Private Letters

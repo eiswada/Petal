@@ -11,7 +11,7 @@ $error = '';
 $success = '';
 
 // Get current admin details
-$stmt = mysqli_prepare($conn, "SELECT id, username, email FROM users WHERE username = ?");
+$stmt = mysqli_prepare($conn, "SELECT id, username, email, avatar FROM users WHERE username = ?");
 mysqli_stmt_bind_param($stmt, 's', $_SESSION['admin_username']);
 mysqli_stmt_execute($stmt);
 $admin = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
@@ -21,6 +21,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = htmlspecialchars(trim($_POST['username'] ?? ''));
         $email = htmlspecialchars(trim($_POST['email'] ?? ''));
         $password = $_POST['password'] ?? '';
+        $avatar_filename = $admin['avatar']; // Default to current
+
+        // Handle Avatar Upload
+        if (isset($_FILES['avatar_file']) && $_FILES['avatar_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $file = $_FILES['avatar_file'];
+            $allowed_exts = ['jpg', 'jpeg', 'png'];
+            $file_ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $file_size = $file['size'];
+
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                $error = 'File upload failed with error code ' . $file['error'];
+            } elseif (!in_array($file_ext, $allowed_exts)) {
+                $error = 'Only JPG, JPEG, and PNG images are allowed.';
+            } elseif ($file_size > 2 * 1024 * 1024) { // 2MB limit
+                $error = 'Image size must be less than 2MB.';
+            } else {
+                // Generate a unique name
+                $new_filename = uniqid('avatar_', true) . '.' . $file_ext;
+                $upload_dir = '../../assets/uploads/avatars/';
+                $destination = $upload_dir . $new_filename;
+
+                if (move_uploaded_file($file['tmp_name'], $destination)) {
+                    // Delete old avatar file if it exists
+                    if (!empty($admin['avatar'])) {
+                        $old_file = $upload_dir . $admin['avatar'];
+                        if (file_exists($old_file)) {
+                            unlink($old_file);
+                        }
+                    }
+                    $avatar_filename = $new_filename;
+                } else {
+                    $error = 'Failed to save uploaded image.';
+                }
+            }
+        }
 
         if (empty($username) || empty($email)) {
             $error = 'Username and Email are required.';
@@ -43,12 +78,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $error = 'New password must be at least 6 characters.';
                     } else {
                         $hashed = password_hash($password, PASSWORD_DEFAULT);
-                        $upd = mysqli_prepare($conn, "UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?");
-                        mysqli_stmt_bind_param($upd, 'sssi', $username, $email, $hashed, $admin['id']);
+                        $upd = mysqli_prepare($conn, "UPDATE users SET username = ?, email = ?, password = ?, avatar = ? WHERE id = ?");
+                        mysqli_stmt_bind_param($upd, 'ssssi', $username, $email, $hashed, $avatar_filename, $admin['id']);
                     }
                 } else {
-                    $upd = mysqli_prepare($conn, "UPDATE users SET username = ?, email = ? WHERE id = ?");
-                    mysqli_stmt_bind_param($upd, 'ssi', $username, $email, $admin['id']);
+                    $upd = mysqli_prepare($conn, "UPDATE users SET username = ?, email = ?, avatar = ? WHERE id = ?");
+                    mysqli_stmt_bind_param($upd, 'sssi', $username, $email, $avatar_filename, $admin['id']);
                 }
 
                 if (empty($error) && mysqli_stmt_execute($upd)) {
@@ -57,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Refresh data
                     $admin['username'] = $username;
                     $admin['email'] = $email;
+                    $admin['avatar'] = $avatar_filename;
                 } elseif (empty($error)) {
                     $error = 'Failed to update profile.';
                 }
@@ -70,6 +106,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($count <= 1) {
             $error = 'Cannot delete the only administrator account. System requires at least one admin.';
         } else {
+            // Delete current avatar first
+            if (!empty($admin['avatar'])) {
+                $old_file = '../../assets/uploads/avatars/' . $admin['avatar'];
+                if (file_exists($old_file)) {
+                    unlink($old_file);
+                }
+            }
             $del = mysqli_prepare($conn, "DELETE FROM users WHERE id = ?");
             mysqli_stmt_bind_param($del, 'i', $admin['id']);
             if (mysqli_stmt_execute($del)) {
@@ -84,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -102,6 +145,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="petal-brand mb-4 d-flex align-items-center gap-2">
             <img src="../../assets/img/logo.png" alt="Petal" style="width: 28px; height: auto;"> Petal
         </div>
+        
+        <!-- Active Admin Profile Widget -->
+        <div class="d-flex align-items-center gap-2 mb-4 p-2" style="background: rgba(255,255,255,0.06); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+            <?php if (!empty($admin['avatar']) && file_exists('../../assets/uploads/avatars/' . $admin['avatar'])): ?>
+                <img src="../../assets/uploads/avatars/<?= htmlspecialchars($admin['avatar']) ?>" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid rgba(255,255,255,0.2);">
+            <?php else: ?>
+                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width: 40px; height: 40px; font-size: 1rem; background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%); border: 2px solid rgba(255,255,255,0.2);">
+                    <?= strtoupper(substr($admin['username'], 0, 1)) ?>
+                </div>
+            <?php endif; ?>
+            <div class="text-truncate">
+                <div class="fw-bold text-white small text-truncate"><?= htmlspecialchars($admin['username']) ?></div>
+                <div class="text-white-50" style="font-size: 0.7rem;">Administrator</div>
+            </div>
+        </div>
+
         <nav class="nav flex-column gap-1">
             <a href="dashboard.php?tab=private" class="nav-link">
                 <i class="bi bi-envelope me-2"></i> Private Letters
@@ -149,8 +208,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="col-md-7">
                 <div class="p-4" style="background:#ffffff; border-radius:20px; border:1px solid var(--border);">
                     <h5 class="fw-bold mb-4">Edit Profile</h5>
-                    <form method="POST" id="settings-form">
+                    <form method="POST" id="settings-form" enctype="multipart/form-data">
                         <input type="hidden" name="update_profile" value="1">
+                        
+                        <!-- Avatar Upload Section -->
+                        <div class="mb-4 d-flex align-items-center gap-3 p-3" style="background: var(--light); border-radius: 16px; border: 1px solid var(--border);">
+                            <div class="avatar-preview-container" style="position: relative;">
+                                <?php if (!empty($admin['avatar']) && file_exists('../../assets/uploads/avatars/' . $admin['avatar'])): ?>
+                                    <img id="avatar-preview" src="../../assets/uploads/avatars/<?= htmlspecialchars($admin['avatar']) ?>" alt="Avatar" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                                <?php else: ?>
+                                    <div id="avatar-initials" class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%); border: 3px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                                        <?= strtoupper(substr($admin['username'], 0, 1)) ?>
+                                    </div>
+                                    <img id="avatar-preview" src="" alt="Avatar" class="rounded-circle d-none" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                                <?php endif; ?>
+                            </div>
+                            <div>
+                                <label for="avatar_file" class="form-label fw-bold mb-1 small d-block">Admin Avatar Image</label>
+                                <input type="file" class="form-control form-control-sm" id="avatar_file" name="avatar_file" accept=".png, .jpg, .jpeg" style="max-width: 250px;">
+                                <span class="text-muted" style="font-size: 0.75rem;">Allowed: JPG, JPEG, PNG (Max 2MB)</span>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label for="username" class="form-label fw-semibold">Username</label>
                             <input type="text" class="form-control" id="username" name="username" 
@@ -244,6 +323,26 @@ document.addEventListener('DOMContentLoaded', function() {
         passwordInput.setAttribute('type', type);
         this.querySelector('i').classList.toggle('bi-eye');
         this.querySelector('i').classList.toggle('bi-eye-slash');
+    });
+
+    // Image preview
+    const avatarFileInput = document.getElementById('avatar_file');
+    const avatarPreview = document.getElementById('avatar-preview');
+    const avatarInitials = document.getElementById('avatar-initials');
+
+    avatarFileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                avatarPreview.src = e.target.result;
+                avatarPreview.classList.remove('d-none');
+                if (avatarInitials) {
+                    avatarInitials.classList.add('d-none');
+                }
+            }
+            reader.readAsDataURL(file);
+        }
     });
 });
 </script>

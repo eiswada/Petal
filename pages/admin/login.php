@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if (empty($username) || empty($password)) {
-        $error = 'Username dan password harus diisi.';
+        $error = 'Username and password are required.';
     } else {
         $stmt = mysqli_prepare($conn, "SELECT * FROM users WHERE username = ?");
         mysqli_stmt_bind_param($stmt, 's', $username);
@@ -29,13 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: dashboard.php');
             exit;
         } else {
-            $error = 'Username atau password salah.';
+            $error = 'Incorrect username or password.';
         }
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,12 +111,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.field-error').forEach(el => el.style.display = 'none');
 
         if (!username.value.trim()) {
-            document.getElementById('error-username').textContent = 'Username harus diisi.';
+            document.getElementById('error-username').textContent = 'Username is required.';
             document.getElementById('error-username').style.display = 'block';
             valid = false;
         }
         if (!password.value) {
-            document.getElementById('error-password').textContent = 'Password harus diisi.';
+            document.getElementById('error-password').textContent = 'Password is required.';
             document.getElementById('error-password').style.display = 'block';
             valid = false;
         }

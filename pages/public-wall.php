@@ -70,7 +70,7 @@ require_once '../includes/header.php';
             <?php foreach ($messages as $msg): ?>
             <div class="col-sm-6 col-lg-4">
                 <div class="petal-card petal-card--colored" data-color="<?= htmlspecialchars($msg['color'] ?? 'white') ?>" data-searchable>
-                    <div class="card-untuk">Untuk <?= htmlspecialchars($msg['untuk_siapa']) ?></div>
+                    <div class="card-untuk">For <?= htmlspecialchars($msg['untuk_siapa']) ?></div>
                     <div class="card-pesan" style="font-family: <?= $msg['font'] === 'serif' ? '\'Playfair Display\', serif' : ($msg['font'] === 'mono' ? '\'Courier New\', Courier, monospace' : 'inherit') ?>;">"<?= htmlspecialchars($msg['pesan']) ?>"</div>
                     <div class="card-meta">
                         <i class="bi bi-clock"></i> <?= date('d M Y', strtotime($msg['created_at'])) ?>
