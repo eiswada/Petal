@@ -5,23 +5,24 @@
 CREATE DATABASE IF NOT EXISTS petal_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE petal_db;
 
--- 1. Colors Table (Table 1 - Warna)
+-- 1. Colors Table
 CREATE TABLE IF NOT EXISTS colors (
     name VARCHAR(20) PRIMARY KEY,
     bg_hex VARCHAR(10) NOT NULL,
     dark_hex VARCHAR(10) NOT NULL
 );
 
--- 2. Users Table (Table 2 - Admin)
+-- 2. Users Table
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    avatar VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Private Messages Table (Table 3 - Kapsul Waktu Privat)
+-- 3. Private Messages Table
 CREATE TABLE IF NOT EXISTS private_messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sender_name VARCHAR(100) NOT NULL,
@@ -35,7 +36,7 @@ CREATE TABLE IF NOT EXISTS private_messages (
     FOREIGN KEY (color) REFERENCES colors(name) ON DELETE SET NULL
 );
 
--- 4. Public Messages Table (Table 4 - Kapsul Waktu Publik)
+-- 4. Public Messages Table
 CREATE TABLE IF NOT EXISTS public_messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     untuk_siapa VARCHAR(150) NOT NULL,
@@ -46,7 +47,7 @@ CREATE TABLE IF NOT EXISTS public_messages (
     FOREIGN KEY (color) REFERENCES colors(name) ON DELETE SET NULL
 );
 
--- 5. Admin Logs Table (Table 5 - Log Aktivitas)
+-- 5. Admin Logs Table
 CREATE TABLE IF NOT EXISTS admin_logs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
@@ -71,8 +72,8 @@ INSERT INTO colors (name, bg_hex, dark_hex) VALUES
 ON DUPLICATE KEY UPDATE bg_hex=VALUES(bg_hex), dark_hex=VALUES(dark_hex);
 
 -- Seed Admin User (password: admin123)
-INSERT INTO users (id, username, email, password) VALUES 
-(1, 'admin', 'admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi')
+INSERT INTO users (id, username, email, password, avatar) VALUES 
+(1, 'admin', 'admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', NULL)
 ON DUPLICATE KEY UPDATE username=VALUES(username), email=VALUES(email);
 
 -- Seed Private Messages
@@ -113,11 +114,11 @@ LEFT JOIN colors c ON pm.color = c.name;
 CREATE OR REPLACE VIEW v_admin_activity_log AS
 SELECT 
     al.id, 
+    u.username,
     al.action, 
     al.target_table, 
     al.target_id, 
-    al.created_at, 
-    u.username
+    al.created_at
 FROM admin_logs al
 LEFT JOIN users u ON al.user_id = u.id;
 
