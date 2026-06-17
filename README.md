@@ -96,7 +96,7 @@ petal/
 2. Untuk masuk ke dashboard admin, akses:
    `http://localhost/petal/pages/admin/login.php`
    - **Username Default**: `admin`
-   - **Password Default**: `admin123`
+   - **Password Default**: `password`
 
 ---
 
