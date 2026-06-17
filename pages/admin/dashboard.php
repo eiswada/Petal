@@ -213,15 +213,13 @@ $total_pages = ceil($total_rows / $per_page);
                                 </form>
                                 <?php if ($msg['status'] === 'pending'): ?>
                                 <a href="send-now.php?id=<?= $msg['id'] ?>"
-                                   class="btn btn-sm"
-                                   style="background:var(--purple-light);color:var(--purple-dark);border:none;border-radius:8px;padding:.3rem .7rem;font-weight:600;"
+                                   class="btn btn-sm btn-send"
                                    onclick="return confirm('Send this email now to <?= htmlspecialchars($msg['email_tujuan']) ?>?')">
-                                    Send
+                                    <i class="bi bi-send"></i> Send
                                 </a>
                                 <?php endif; ?>
                                 <a href="delete.php?id=<?= $msg['id'] ?>&type=private&tab=private" 
-                                   class="btn btn-sm btn-delete" 
-                                   style="background:var(--pink-light);color:var(--pink-dark);border:none;border-radius:8px;padding:.3rem .7rem;">
+                                   class="btn btn-sm btn-delete">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </div>
@@ -258,8 +256,7 @@ $total_pages = ceil($total_rows / $per_page);
                         <td><?= date('d M Y', strtotime($msg['created_at'])) ?></td>
                         <td>
                             <a href="delete.php?id=<?= $msg['id'] ?>&type=public&tab=public" 
-                               class="btn btn-sm btn-delete"
-                               style="background:var(--pink-light);color:var(--pink-dark);border:none;border-radius:8px;padding:.3rem .7rem;">
+                               class="btn btn-sm btn-delete">
                                 <i class="bi bi-trash"></i>
                             </a>
                         </td>

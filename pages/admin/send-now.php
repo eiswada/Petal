@@ -17,8 +17,7 @@ if ($id) {
     $msg = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
     if ($msg) {
-        // Debug mode — tampilkan hasil langsung
-        $result = sendFutureLetter(
+            $result = sendFutureLetter(
             $msg['email_tujuan'],
             $msg['sender_name'],
             $msg['pesan'],
