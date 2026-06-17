@@ -104,11 +104,23 @@ petal/
 
 Berikut beberapa tangkapan layar antarmuka aplikasi Petal:
 
-### 1. Halaman Beranda (Desktop)
-![Homepage](assets/img/screenshot_home.png)
+### 1. Halaman Beranda (Homepage)
+![Homepage](assets/img/Screenshot_home.png)
 
-### 2. Halaman Dashboard Admin & Tabel Responsif (Mobile)
-![Mobile Dashboard](assets/img/screenshot_mobile_dashboard.png)
+### 2. Halaman Tulis Pesan (Write)
+![Write Page](assets/img/Screenshot_write.png)
+
+### 3. Dinding Pesan Publik (Public Wall)
+![Public Wall](assets/img/Screenshot_wall.png)
+
+### 4. Dashboard Admin
+![Admin Dashboard](assets/img/Screenshot_admin_dashboard.png)
+
+### 5. Pengaturan Admin (Settings)
+![Admin Settings](assets/img/Screenshot_admin_settings.png)
+
+### 6. Dashboard Admin Tampilan Mobile
+![Mobile Dashboard](assets/img/Screenshot_mobile_dashboard.png)
 
 ---
 
